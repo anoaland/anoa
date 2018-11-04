@@ -1,0 +1,46 @@
+{
+  "name": "anoa",
+  "version": "0.0.0",
+  "description": "Anoa React Native SDK",
+  "main": "dist/index.js",
+  "typings": "typings/index.d.ts",
+  "files": [
+    "dist",
+    "typings"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "tslint 'src/**/*.ts{,x}'",
+    "compile": "tsc -d --declarationDir ./typings",
+    "build": "rm -rf typings && rm -rf dist && npm run compile && prettier ./typings/**/*.d.ts --write"
+  },
+  "author": "Budi Adiono <budiadiono@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anoaland/anoa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/anoaland/anoa/issues"
+  },
+  "homepage": "https://github.com/anoaland/anoa#readme",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^16.6.0",
+    "react-redux": "^5.1.0",
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.4.18",
+    "@types/react-redux": "^6.0.9",
+    "prettier": "^1.14.3",
+    "react": "^16.6.0",
+    "react-redux": "^5.1.0",
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.1.6"
+  }
+}
