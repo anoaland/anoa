@@ -3,7 +3,8 @@ import {
   connect,
   MapDispatchToPropsParam,
   MapStateToPropsParam,
-  Provider
+  Provider,
+  InferableComponentEnhancerWithProps
 } from 'react-redux'
 import {
   Action,
@@ -68,6 +69,27 @@ export class ReduxStore<
   )
 
   /**
+   * Store HOC.
+   * @param mapStateToProps Map local state to store state
+   * @param mapDispatchToProps Map local action to store action
+   */
+  withStore<TStateProps = {}, TDispatchProps = {}, TOwnProps = {}>(
+    mapStateToProps?: MapStateToPropsParam<TStateProps, TOwnProps, TState>,
+    mapDispatchToProps?: (
+      dispatch: ThunkDispatchFn,
+      ownProps: TOwnProps
+    ) => MapDispatchToPropsParam<TDispatchProps, TOwnProps>
+  ): InferableComponentEnhancerWithProps<
+    TStateProps & TDispatchProps,
+    TOwnProps
+  > {
+    return connect(
+      mapStateToProps,
+      mapDispatchToProps as any
+    )
+  }
+
+  /**
    * Store class decorator.
    * @param mapStateToProps Map local state to store state
    * @param mapDispatchToProps Map local action to store action
@@ -80,9 +102,6 @@ export class ReduxStore<
     ) => MapDispatchToPropsParam<TDispatchProps, TOwnProps>
   ): ClassDecorator {
     return (target: any) =>
-      connect(
-        mapStateToProps,
-        mapDispatchToProps as any
-      )(target) as any
+      this.withStore(mapStateToProps, mapDispatchToProps as any)(target) as any
   }
 }
