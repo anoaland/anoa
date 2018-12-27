@@ -27,11 +27,31 @@ export const AppStore = new ReduxStore<RootState, RootActions>(reducers)
 
 ### Init App Store
 
+Initialize your redux store.
+
 ```ts
-await AppStore.init()
+await AppStore.init({
+  // redux initial state (optional)
+  initialState: {
+    todo: {
+      foo: 'foo'
+    }
+  },
+  // redux middleware before redux thunk middleware attached (optional)
+  beforeMiddleware: [
+    awesomeMiddleware,
+    anotherMiddleware    
+  ],
+  // redux middleware before redux thunk middleware attached (optional)
+  afterMiddleware: [
+    logOrSomethingMiddleware
+  ]
+})
 ```
 
 ### App Store Provider
+
+Wrap your main component with your store provider.
 
 ```tsx
 <AppStore.Provider>
@@ -42,6 +62,8 @@ await AppStore.init()
 ```
 
 ### App Store Class Decorator
+
+Connect your component to store using `withStoreClass` class decorator.
 
 ```tsx
 @AppStore.withStoreClass<StateProps, ActionProps>(

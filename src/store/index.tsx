@@ -12,8 +12,7 @@ import {
   createStore,
   Middleware,
   Reducer,
-  Store,
-  StoreEnhancer
+  Store
 } from 'redux'
 import thunk, { ThunkDispatch } from 'redux-thunk'
 
@@ -33,31 +32,61 @@ export class ReduxStore<
   }
 
   /**
-   * Initialze app store. Call this once before render Store.Provider.
+   * Initialze app store. Call this once before using Store.Provider.
+   * @param param state and middlewares
+   */
+  async init(param: InitStoreParameter<TState>): Promise<void>
+
+  /**
+   * Initialze app store. Call this once before using Store.Provider.
    * @param getInitialState Async function to to get the initial app state.
    * @param beforeMiddleware Redux Middleware before thunk middleware get called.
    * @param afterMiddleware Redux middleware after thunk middleware get called.
    */
   async init(
     getInitialState?: () => Promise<Partial<TState>>,
-    beforeMiddleware?: Middleware,
-    afterMiddleware?: Middleware
-  ) {
-    const initialState: Partial<TState> = getInitialState
-      ? await getInitialState()
-      : {}
+    beforeMiddleware?: Middleware<{}, TState> | Middleware<{}, TState>[],
+    afterMiddleware?: Middleware<{}, TState> | Middleware<{}, TState>[]
+  ): Promise<void>
 
-    let middleware: StoreEnhancer
-    if (beforeMiddleware && afterMiddleware) {
-      middleware = applyMiddleware(beforeMiddleware, thunk, afterMiddleware)
-    } else if (beforeMiddleware) {
-      middleware = applyMiddleware(beforeMiddleware, thunk)
-    } else if (afterMiddleware) {
-      middleware = applyMiddleware(thunk, afterMiddleware)
-    } else {
-      middleware = applyMiddleware(thunk)
+  async init(
+    param?: (() => Promise<Partial<TState>>) | InitStoreParameter<TState>,
+    beforeMiddleware?: Middleware<{}, TState> | Middleware<{}, TState>[],
+    afterMiddleware?: Middleware<{}, TState> | Middleware<{}, TState>[]
+  ): Promise<void> {
+    let initialState: Partial<TState> = {}
+
+    // evaluate function parameters
+    if (typeof param === 'function') {
+      initialState = await param()
+    } else if (typeof param === 'object') {
+      initialState = param.initialState
+        ? typeof param.initialState === 'function'
+          ? await param.initialState()
+          : param.initialState
+        : {}
+      beforeMiddleware = param.beforeMiddleware
+      afterMiddleware = param.afterMiddleware
     }
 
+    // build middlewares
+    const middlewares: Middleware[] = []
+    if (beforeMiddleware instanceof Array) {
+      middlewares.push(...beforeMiddleware)
+    } else if (beforeMiddleware) {
+      middlewares.push(beforeMiddleware)
+    }
+
+    middlewares.push(thunk)
+
+    if (afterMiddleware instanceof Array) {
+      middlewares.push(...afterMiddleware)
+    } else if (afterMiddleware) {
+      middlewares.push(afterMiddleware)
+    }
+
+    // apply middlewares and create store
+    const middleware = applyMiddleware(...middlewares)
     this.store = createStore(this.reducer, initialState as any, middleware)
   }
 
@@ -104,4 +133,10 @@ export class ReduxStore<
     return (target: any) =>
       this.withStore(mapStateToProps, mapDispatchToProps as any)(target) as any
   }
+}
+
+export interface InitStoreParameter<TState> {
+  initialState?: (() => Promise<Partial<TState>>) | Partial<TState>
+  beforeMiddleware?: Middleware<{}, TState> | Middleware<{}, TState>[]
+  afterMiddleware?: Middleware<{}, TState> | Middleware<{}, TState>[]
 }
