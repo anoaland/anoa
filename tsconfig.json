@@ -17,7 +17,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "jsx": "react",
-    "allowSyntheticDefaultImports": true,
     "noEmitHelpers": true,
     "importHelpers": true,
     "strict": true,
